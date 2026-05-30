@@ -27,14 +27,13 @@
             </NuxtLink>
           </div>
 
-          <!-- Membership Tip -->
+          <!-- Purchase Info -->
           <v-alert type="info" variant="tonal" density="compact" class="mb-4">
             <template #prepend>
               <v-icon size="18" color="amber">mdi-lightbulb</v-icon>
             </template>
             <span class="text-body-2">
-              Tip: Get unlimited access to all products with a
-              <NuxtLink to="/membership" class="text-primary font-weight-medium">membership</NuxtLink>
+              Buy once, download unlimited times from your library
             </span>
           </v-alert>
         </v-col>
@@ -73,9 +72,9 @@
               Buy Now
             </v-btn>
 
-            <v-btn variant="text" block class="mb-2">
+            <v-btn v-if="isPurchased" variant="text" block class="mb-2" to="/account">
               <v-icon start>mdi-download</v-icon>
-              View in Library
+              Download from Library
             </v-btn>
           </v-card>
 
@@ -203,6 +202,11 @@ import { products } from '~/data/products'
 
 const route = useRoute()
 const { addToCart } = useCart()
+const { hasPurchased } = useAuth()
+
+const isPurchased = computed(() =>
+  product.value ? hasPurchased(product.value.id) : false
+)
 
 const product = computed(() =>
   products.find(p => p.slug === route.params.slug)

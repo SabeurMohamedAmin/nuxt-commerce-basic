@@ -153,7 +153,7 @@
 
 <script setup lang="ts">
 const { cartItems, cartTotal, clearCart } = useCart()
-const { user } = useAuth()
+const { user, addPurchasedProducts } = useAuth()
 
 const email = ref(user.value?.email || '')
 const cardNumber = ref('')
@@ -166,7 +166,9 @@ const saveInfo = ref(false)
 const countries = ['France', 'United States', 'United Kingdom', 'Germany', 'Canada', 'Algeria']
 
 function handlePayment() {
-  // Mock payment
+  // Add purchased products to user's library
+  const purchasedIds = cartItems.value.map(item => item.id)
+  addPurchasedProducts(purchasedIds)
   clearCart()
   navigateTo('/account')
 }

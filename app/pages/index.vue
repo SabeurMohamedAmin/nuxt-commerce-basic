@@ -5,8 +5,8 @@
       <v-container class="py-16 text-center text-white">
         <h1 class="text-h3 text-md-h2 font-weight-bold mb-4">Digital Products Marketplace</h1>
         <p class="text-body-1 mb-8 mx-auto" style="max-width: 600px">
-          Access premium digital products, courses, and resources. Choose between
-          individual purchases or unlock everything with a membership.
+          Access premium digital products, courses, and resources.
+          Buy once, download anytime from your library.
         </p>
 
         <!-- Search Bar -->
@@ -30,15 +30,12 @@
         </v-card>
 
         <p class="text-body-2 mt-4 text-white-darken-1">
-          ✓ All Items $2.49 Each ✓ Digital only ✓ Instant Public Access
+          ✓ All Items $2.49 Each ✓ Digital only ✓ Instant Download ✓ Unlimited Re-downloads
         </p>
 
         <div class="d-flex justify-center ga-3 mt-6">
           <v-btn color="white" variant="flat" rounded="pill" to="/products">
             Browse Products
-          </v-btn>
-          <v-btn color="white" variant="outlined" rounded="pill" to="/membership">
-            View Membership
           </v-btn>
         </div>
       </v-container>
@@ -85,42 +82,39 @@
       </div>
     </v-container>
 
-    <!-- Membership CTA -->
+    <!-- How It Works -->
     <section class="bg-grey-lighten-4 py-12 mt-8">
       <v-container>
-        <v-card class="mx-auto pa-8" max-width="800" rounded="xl" flat>
-          <h2 class="text-h4 font-weight-bold text-center mb-4">Unlimited Access with Membership</h2>
-          <p class="text-body-1 text-grey text-center mb-6">
-            Get instant downloads of all our digital products with a single membership. Choose from monthly or annual plans.
-          </p>
-
-          <v-row justify="center" class="mb-6">
-            <v-col cols="auto">
-              <div class="text-center">
-                <p class="text-h5 font-weight-bold text-primary">Monthly</p>
-                <p class="text-body-2 text-grey">$4.99 / month</p>
-              </div>
-            </v-col>
-            <v-col cols="auto">
-              <div class="text-center">
-                <p class="text-h5 font-weight-bold text-primary">Annual</p>
-                <p class="text-body-2 text-grey">$29.99 / year</p>
-              </div>
-            </v-col>
-            <v-col cols="auto">
-              <div class="text-center">
-                <p class="text-h5 font-weight-bold text-primary">Lifetime</p>
-                <p class="text-body-2 text-grey">$99.99 one-time</p>
-              </div>
-            </v-col>
-          </v-row>
-
-          <div class="text-center">
-            <v-btn color="primary" size="large" rounded="pill" to="/membership">
-              Purchase Membership Plan
-            </v-btn>
-          </div>
-        </v-card>
+        <h2 class="text-h4 font-weight-bold text-center mb-8">How It Works</h2>
+        <v-row>
+          <v-col cols="12" md="4">
+            <div class="text-center">
+              <v-avatar color="primary" size="56" class="mb-3">
+                <v-icon color="white">mdi-magnify</v-icon>
+              </v-avatar>
+              <h3 class="text-body-1 font-weight-bold mb-2">1. Browse & Choose</h3>
+              <p class="text-body-2 text-grey">Find the perfect theme or plugin from our collection</p>
+            </div>
+          </v-col>
+          <v-col cols="12" md="4">
+            <div class="text-center">
+              <v-avatar color="primary" size="56" class="mb-3">
+                <v-icon color="white">mdi-cart-check</v-icon>
+              </v-avatar>
+              <h3 class="text-body-1 font-weight-bold mb-2">2. Purchase</h3>
+              <p class="text-body-2 text-grey">Pay once with secure Stripe checkout — no subscriptions</p>
+            </div>
+          </v-col>
+          <v-col cols="12" md="4">
+            <div class="text-center">
+              <v-avatar color="primary" size="56" class="mb-3">
+                <v-icon color="white">mdi-download</v-icon>
+              </v-avatar>
+              <h3 class="text-body-1 font-weight-bold mb-2">3. Download Anytime</h3>
+              <p class="text-body-2 text-grey">Access your purchases forever — unlimited re-downloads</p>
+            </div>
+          </v-col>
+        </v-row>
       </v-container>
     </section>
 
@@ -158,10 +152,10 @@ const searchQuery = ref('')
 const featuredProducts = computed(() => products.slice(0, 6))
 
 const features = [
-  { icon: 'mdi-download', title: 'Instant Downloads', description: 'Get immediate access to all digital products after purchase' },
-  { icon: 'mdi-card-account-details', title: 'Membership Plans', description: 'Unlock all content access to our entire library' },
-  { icon: 'mdi-star-check', title: 'Secure Checkout', description: 'Safe and easy experience powered by Stripe' },
-  { icon: 'mdi-headset', title: 'Instant Support', description: 'Get help whenever you need with our support team' },
+  { icon: 'mdi-download', title: 'Instant Downloads', description: 'Get immediate access after purchase — download as many times as you need' },
+  { icon: 'mdi-currency-usd-off', title: 'No Subscriptions', description: 'Pay once per product, own it forever. No recurring fees.' },
+  { icon: 'mdi-star-check', title: 'Secure Checkout', description: 'Safe and easy payment powered by Stripe' },
+  { icon: 'mdi-headset', title: 'Support', description: 'Get help whenever you need with our support team' },
 ]
 
 function goToSearch() {

@@ -31,9 +31,6 @@
             </v-list-item>
           </v-list>
         </v-menu>
-        <NuxtLink to="/membership" class="text-body-2 text-grey-darken-3 text-decoration-none font-weight-medium">
-          Membership
-        </NuxtLink>
       </nav>
 
       <v-spacer />

@@ -11,7 +11,7 @@
 
     <!-- Logged in -->
     <template v-else>
-      <div class="d-flex justify-space-between align-center mb-2">
+      <div class="d-flex justify-space-between align-center mb-6">
         <div>
           <h1 class="text-h4 font-weight-bold">My Account</h1>
           <p class="text-body-2 text-grey">Welcome, {{ user?.email }}</p>
@@ -19,24 +19,9 @@
         <v-btn variant="text" color="error" @click="logout">Sign Out</v-btn>
       </div>
 
-      <!-- Subscription Banner -->
-      <v-card color="success" variant="tonal" class="mb-6 pa-4" rounded="lg">
-        <div class="d-flex align-center justify-space-between">
-          <div class="d-flex align-center ga-3">
-            <v-icon color="success">mdi-check-circle</v-icon>
-            <div>
-              <span class="font-weight-bold">Annual Unlimited</span>
-              <v-chip color="success" size="x-small" class="ml-2">Active</v-chip>
-              <p class="text-body-2 text-grey-darken-1">Unlimited Access • Unlimited Downloads</p>
-            </div>
-          </div>
-          <v-btn variant="outlined" size="small" to="/membership">Manage Subscription</v-btn>
-        </div>
-      </v-card>
-
       <!-- Tabs -->
       <v-tabs v-model="activeTab" color="primary" class="mb-6">
-        <v-tab value="library">My Library ({{ libraryProducts.length }})</v-tab>
+        <v-tab value="library">My Library ({{ purchasedList.length }})</v-tab>
         <v-tab value="collections">My Collections</v-tab>
       </v-tabs>
 
@@ -55,50 +40,59 @@
       <!-- Library Grid -->
       <v-window v-model="activeTab">
         <v-window-item value="library">
-          <v-row>
-            <v-col
-              v-for="product in filteredLibrary"
-              :key="product.id"
-              cols="12"
-              sm="6"
-              md="4"
-              lg="3"
-            >
-              <v-card variant="outlined" rounded="lg" class="h-100">
-                <v-img :src="product.image" :alt="product.title" height="160" cover />
-                <v-card-text class="pb-2">
-                  <p class="text-body-2 font-weight-medium library-title">
-                    {{ product.title.toUpperCase() }}
-                  </p>
-                </v-card-text>
-                <v-card-actions class="px-4 pb-4 pt-0">
-                  <v-btn
-                    block
-                    color="primary"
-                    variant="flat"
-                    size="small"
-                    prepend-icon="mdi-download"
-                  >
-                    Download
-                  </v-btn>
-                  <v-btn icon variant="text" size="x-small" class="ml-2">
-                    <v-icon>mdi-bookmark-outline</v-icon>
-                  </v-btn>
-                </v-card-actions>
-              </v-card>
-            </v-col>
-          </v-row>
+          <template v-if="purchasedList.length">
+            <v-row>
+              <v-col
+                v-for="product in filteredLibrary"
+                :key="product.id"
+                cols="12"
+                sm="6"
+                md="4"
+                lg="3"
+              >
+                <v-card variant="outlined" rounded="lg" class="h-100">
+                  <v-img :src="product.image" :alt="product.title" height="160" cover />
+                  <v-card-text class="pb-2">
+                    <p class="text-body-2 font-weight-medium library-title">
+                      {{ product.title.toUpperCase() }}
+                    </p>
+                  </v-card-text>
+                  <v-card-actions class="px-4 pb-4 pt-0">
+                    <v-btn
+                      block
+                      color="primary"
+                      variant="flat"
+                      size="small"
+                      prepend-icon="mdi-download"
+                    >
+                      Download
+                    </v-btn>
+                    <v-btn icon variant="text" size="x-small" class="ml-2">
+                      <v-icon>mdi-bookmark-outline</v-icon>
+                    </v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-col>
+            </v-row>
 
-          <!-- Pagination -->
-          <div v-if="libraryTotalPages > 1" class="d-flex justify-center mt-8">
-            <v-pagination
-              v-model="libraryPage"
-              :length="libraryTotalPages"
-              :total-visible="5"
-              rounded="circle"
-              color="primary"
-            />
-          </div>
+            <!-- Pagination -->
+            <div v-if="libraryTotalPages > 1" class="d-flex justify-center mt-8">
+              <v-pagination
+                v-model="libraryPage"
+                :length="libraryTotalPages"
+                :total-visible="5"
+                rounded="circle"
+                color="primary"
+              />
+            </div>
+          </template>
+
+          <v-card v-else flat class="text-center py-12">
+            <v-icon size="48" color="grey-lighten-1">mdi-package-variant</v-icon>
+            <p class="text-body-1 text-grey mt-4">No purchases yet</p>
+            <p class="text-body-2 text-grey mb-4">Products you buy will appear here for unlimited downloads</p>
+            <v-btn color="primary" variant="outlined" to="/products">Browse Products</v-btn>
+          </v-card>
         </v-window-item>
 
         <v-window-item value="collections">
@@ -123,11 +117,12 @@ const librarySearch = ref('')
 const libraryPage = ref(1)
 const perPage = 16
 
-// Mock: user has access to all products with membership
-const libraryProducts = computed(() => products)
+const purchasedList = computed(() =>
+  products.filter(p => user.value?.purchasedProducts.includes(p.id))
+)
 
 const filteredLibrary = computed(() => {
-  let result = libraryProducts.value
+  let result = purchasedList.value
   if (librarySearch.value) {
     const q = librarySearch.value.toLowerCase()
     result = result.filter(p => p.title.toLowerCase().includes(q))
@@ -136,7 +131,7 @@ const filteredLibrary = computed(() => {
   return result.slice(start, start + perPage)
 })
 
-const libraryTotalPages = computed(() => Math.ceil(libraryProducts.value.length / perPage))
+const libraryTotalPages = computed(() => Math.ceil(purchasedList.value.length / perPage))
 </script>
 
 <style scoped>
