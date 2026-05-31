@@ -32,7 +32,6 @@ export default defineNuxtConfig({
 
   css: [
     'vuetify/styles',
-    '@mdi/font/css/materialdesignicons.css',
   ],
 
   vite: {
@@ -49,8 +48,12 @@ export default defineNuxtConfig({
 
   app: {
     head: {
+      htmlAttrs: { lang: 'en' },
       link: [
         { rel: 'icon', type: 'image/png', href: '/images/logo/image.png' },
+      ],
+      meta: [
+        { name: 'description', content: 'Digital products marketplace - WordPress themes, plugins, and templates. Buy once, download anytime.' },
       ],
     },
   },

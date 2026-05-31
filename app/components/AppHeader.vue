@@ -16,7 +16,7 @@ const userInitial = computed(() =>
   <v-app-bar flat :color="isDark ? 'grey-darken-4' : 'white'" elevation="1">
     <v-container class="d-flex align-center">
       <!-- Hamburger (mobile) -->
-      <v-btn icon variant="text" size="small" class="d-md-none mr-2" @click="mobileDrawer = true">
+      <v-btn icon variant="text" size="small" class="d-md-none mr-2" aria-label="Open menu" @click="mobileDrawer = true">
         <v-icon>mdi-menu</v-icon>
       </v-btn>
 
@@ -59,15 +59,15 @@ const userInitial = computed(() =>
 
       <!-- Actions -->
       <div class="d-flex align-center ga-1">
-        <v-btn icon variant="text" size="small" @click="toggleTheme">
+        <v-btn icon variant="text" size="small" aria-label="Toggle theme" @click="toggleTheme">
           <v-icon>{{ isDark ? 'mdi-weather-sunny' : 'mdi-weather-night' }}</v-icon>
         </v-btn>
 
-        <v-btn icon variant="text" size="small" to="/products" class="d-none d-sm-flex">
+        <v-btn icon variant="text" size="small" to="/products" class="d-none d-sm-flex" aria-label="Search">
           <v-icon>mdi-magnify</v-icon>
         </v-btn>
 
-        <v-btn icon variant="text" size="small" @click="toggleCart">
+        <v-btn icon variant="text" size="small" aria-label="Shopping cart" @click="toggleCart">
           <v-badge :content="cartCount" :model-value="cartCount > 0" color="error" floating>
             <v-icon>mdi-cart-outline</v-icon>
           </v-badge>

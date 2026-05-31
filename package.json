@@ -48,6 +48,7 @@
     "@vue/test-utils": "^2.4.10",
     "happy-dom": "^20.9.0",
     "sass-embedded": "^1.100.0",
+    "sharp": "^0.34.5",
     "tsx": "^4.22.3",
     "vitest": "^4.1.7"
   }
