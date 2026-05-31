@@ -1,4 +1,5 @@
 import { createVuetify } from 'vuetify'
+import { THEME_COLORS } from '~/constants'
 
 export default defineNuxtPlugin((app) => {
   const vuetify = createVuetify({
@@ -6,12 +7,16 @@ export default defineNuxtPlugin((app) => {
       defaultTheme: 'light',
       themes: {
         light: {
+          colors: { ...THEME_COLORS },
+        },
+        dark: {
+          dark: true,
           colors: {
-            primary: '#1565C0',
-            secondary: '#424242',
-            accent: '#FF6F00',
-            background: '#F5F7FA',
-            surface: '#FFFFFF',
+            primary: '#42A5F5',
+            secondary: '#B0BEC5',
+            accent: '#FFB74D',
+            background: '#121212',
+            surface: '#1E1E1E',
           },
         },
       },

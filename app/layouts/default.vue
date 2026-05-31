@@ -1,3 +1,5 @@
+<script setup lang="ts"></script>
+
 <template>
   <v-app>
     <AppHeader />
@@ -5,6 +7,10 @@
       <slot />
     </v-main>
     <AppFooter />
-    <CartDrawer />
+    <ClientOnly>
+      <CartDrawer />
+    </ClientOnly>
   </v-app>
 </template>
+
+<style scoped></style>

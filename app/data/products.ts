@@ -1,83 +1,59 @@
-export interface Product {
-  id: number
-  title: string
-  slug: string
-  price: number
-  image: string
-  category: string
-  categorySlug: string
+import type { Product } from '~/types'
+import { CATEGORIES, DEFAULT_PRODUCT_PRICE } from '~/constants'
+import { slugify } from '~/utils/format'
+
+// ─── Raw Product Data ───────────────────────────────────────────
+const productEntries: Array<{ title: string; category: string }> = [
+  { title: 'Medicashop - Pharmacy & Medical Store Elementor Template Kit', category: 'elementor-kits' },
+  { title: 'Barrameru - Outdoor Adventure Camping Store Elementor Pro', category: 'elementor-kits' },
+  { title: 'Jantel - Lingerie & Nightwear Store Elementor Pro Template Kit', category: 'elementor-kits' },
+  { title: 'Cabinet - Furniture Store Elementor Template Kit Latest', category: 'elementor-kits' },
+  { title: 'Sleepy - Mattress & Bedding Online Store Elementor Pro Template Kit', category: 'elementor-kits' },
+  { title: 'Bagage - WooCommerce Bag Store Elementor Pro Template Kit', category: 'elementor-kits' },
+  { title: 'Cutbert - Furniture Store Elementor Template Kit Latest', category: 'elementor-kits' },
+  { title: 'Bloxic - Furniture Store HTML Template Latest Version', category: 'html-templates' },
+  { title: 'Gameplay - Video Game Store Elementor Template Kit Latest', category: 'elementor-kits' },
+  { title: 'Xanadu - Multi Store Responsive Shopify Theme Latest Version', category: 'shopify-themes' },
+  { title: 'DailyFresh - Grocery Store Elementor Template Kit Latest', category: 'elementor-kits' },
+  { title: 'E-Store - Responsive HTML Template Latest Version', category: 'html-templates' },
+  { title: 'Megha - Minimal Shopify Store Latest Version', category: 'shopify-themes' },
+  { title: 'Bookly - Bookstore Shopify Theme Latest Version', category: 'shopify-themes' },
+  { title: 'Herpride - Skincare Shopify Store Theme Latest Version', category: 'shopify-themes' },
+  { title: 'Palos - Multi Store Responsive Shopify Theme Latest Version', category: 'shopify-themes' },
+  { title: 'Elementor Pro WordPress Plugin Latest Version', category: 'wordpress-plugins' },
+  { title: 'WPBakery Page Builder for WordPress', category: 'wordpress-plugins' },
+  { title: 'Flavstarter - Multipurpose HTML Template Latest Version', category: 'html-templates' },
+  { title: 'Tyres - Tyre Store WooCommerce Theme Latest Version', category: 'wordpress-themes' },
+  { title: 'Bazart - Digital Marketplace React Next.js Latest Version', category: 'html-templates' },
+  { title: 'Flashmart - WooCommerce Supermarket Theme Latest Version', category: 'wordpress-themes' },
+  { title: 'Spacemax - Multipurpose HTML Template Latest Version', category: 'html-templates' },
+  { title: 'Furea - Furniture Ecommerce HTML Template Latest Version', category: 'html-templates' },
+  { title: 'Katerina - Photography Portfolio Site Template Latest', category: 'html-templates' },
+  { title: 'Carbu - Car Repair Elementor Template Kit Latest Version', category: 'elementor-kits' },
+  { title: 'Mebel - Pottery & Ceramic Studio Elementor Template Kit', category: 'elementor-kits' },
+  { title: 'Curriporto - Creative Portfolio Elementor Pro', category: 'elementor-kits' },
+  { title: 'Barber 1997 - Barbershop Elementor Template Kits Latest', category: 'elementor-kits' },
+  { title: 'Markit - Digital Marketplace React Next.js Latest Version', category: 'html-templates' },
+  { title: 'Lenka - Creative Digital Agency Elementor Template Kit Latest', category: 'elementor-kits' },
+  { title: 'Ballera - Ballet & Dance School Elementor Template Kit', category: 'elementor-kits' },
+  { title: 'Career - Job Recruitment Elementor Template Kit Latest', category: 'elementor-kits' },
+  { title: 'Cygnus - Minimalist Business HTML Template Latest Version', category: 'html-templates' },
+  { title: 'Archtek - Architecture & Interior HTML Template Latest', category: 'html-templates' },
+  { title: 'Power - Personal CV Elementor Pro Template Kit Latest Version', category: 'elementor-kits' },
+  { title: 'Aenft - NFT Minting or Collection Landing Page Latest', category: 'html-templates' },
+]
+
+// ─── Build Product List ─────────────────────────────────────────
+function getCategoryName(slug: string): string {
+  return CATEGORIES.find(c => c.slug === slug)?.name ?? 'Uncategorized'
 }
 
-export const categories = [
-  { name: 'WordPress Themes', slug: 'wordpress-themes', icon: 'mdi-wordpress' },
-  { name: 'Elementor Template Kits', slug: 'elementor-kits', icon: 'mdi-palette' },
-  { name: 'Joomla Templates', slug: 'joomla-templates', icon: 'mdi-joomla' },
-  { name: 'Magento Themes', slug: 'magento-themes', icon: 'mdi-shopping' },
-  { name: 'Shopify Themes', slug: 'shopify-themes', icon: 'mdi-shopify' },
-  { name: 'PrestaShop Themes', slug: 'prestashop-themes', icon: 'mdi-store' },
-  { name: 'WordPress Plugins', slug: 'wordpress-plugins', icon: 'mdi-puzzle' },
-  { name: 'HTML Templates', slug: 'html-templates', icon: 'mdi-language-html5' },
-]
-
-const productNames = [
-  'Medicashop - Pharmacy & Medical Store Elementor Template Kit',
-  'Barrameru - Outdoor Adventure Camping Store Elementor Pro',
-  'Jantel - Lingerie & Nightwear Store Elementor Pro Template Kit',
-  'Cabinet - Furniture Store Elementor Template Kit Latest',
-  'Sleepy - Mattress & Bedding Online Store Elementor Pro Template Kit',
-  'Bagage - WooCommerce Bag Store Elementor Pro Template Kit',
-  'Cutbert - Furniture Store Elementor Template Kit Latest',
-  'Bloxic - Furniture Store HTML Template Latest Version',
-  'Gameplay - Video Game Store Elementor Template Kit Latest',
-  'Xanadu - Multi Store Responsive Shopify Theme Latest Version',
-  'DailyFresh - Grocery Store Elementor Template Kit Latest',
-  'E-Store - Responsive HTML Template Latest Version',
-  'Megha - Minimal Shopify Store Latest Version',
-  'Bookly - Bookstore Shopify Theme Latest Version',
-  'Herpride - Skincare Shopify Store Theme Latest Version',
-  'Palos - Multi Store Responsive Shopify Theme Latest Version',
-  'Elementor Pro WordPress Plugin Latest Version',
-  'WPBakery Page Builder for WordPress',
-  'Flavstarter - Multipurpose HTML Template Latest Version',
-  'Tyres - Tyre Store WooCommerce Theme Latest Version',
-  'Bazart - Digital Marketplace React Next.js Latest Version',
-  'Flashmart - WooCommerce Supermarket Theme Latest Version',
-  'Spacemax - Multipurpose HTML Template Latest Version',
-  'Furea - Furniture Ecommerce HTML Template Latest Version',
-  'Katerina - Photography Portfolio Site Template Latest',
-  'Carbu - Car Repair Elementor Template Kit Latest Version',
-  'Mebel - Pottery & Ceramic Studio Elementor Template Kit',
-  'Curriporto - Creative Portfolio Elementor Pro',
-  'Barber 1997 - Barbershop Elementor Template Kits Latest',
-  'Markit - Digital Marketplace React Next.js Latest Version',
-  'Lenka - Creative Digital Agency Elementor Template Kit Latest',
-  'Ballera - Ballet & Dance School Elementor Template Kit',
-  'Career - Job Recruitment Elementor Template Kit Latest',
-  'Cygnus - Minimalist Business HTML Template Latest Version',
-  'Archtek - Architecture & Interior HTML Template Latest',
-  'Power - Personal CV Elementor Pro Template Kit Latest Version',
-  'Aenft - NFT Minting or Collection Landing Page Latest',
-]
-
-const categoryAssignments = [
-  'elementor-kits', 'elementor-kits', 'elementor-kits', 'elementor-kits',
-  'elementor-kits', 'elementor-kits', 'elementor-kits', 'html-templates',
-  'elementor-kits', 'shopify-themes', 'elementor-kits', 'html-templates',
-  'shopify-themes', 'shopify-themes', 'shopify-themes', 'shopify-themes',
-  'wordpress-plugins', 'wordpress-plugins', 'html-templates', 'wordpress-themes',
-  'html-templates', 'wordpress-themes', 'html-templates', 'html-templates',
-  'html-templates', 'elementor-kits', 'elementor-kits', 'elementor-kits',
-  'elementor-kits', 'html-templates', 'elementor-kits', 'elementor-kits',
-  'elementor-kits', 'html-templates', 'html-templates', 'elementor-kits',
-  'html-templates',
-]
-
-export const products: Product[] = productNames.map((title, i) => ({
-  id: i + 1,
-  title,
-  slug: title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
-  price: 2.49,
-  image: `https://picsum.photos/seed/product${i + 1}/400/300`,
-  category: categories.find(c => c.slug === categoryAssignments[i])?.name || 'Elementor Template Kits',
-  categorySlug: categoryAssignments[i],
+export const products: Product[] = productEntries.map((entry, index) => ({
+  id: index + 1,
+  title: entry.title,
+  slug: slugify(entry.title),
+  price: DEFAULT_PRODUCT_PRICE,
+  image: `https://picsum.photos/seed/product${index + 1}/400/300`,
+  category: getCategoryName(entry.category),
+  categorySlug: entry.category,
 }))

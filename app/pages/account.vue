@@ -1,7 +1,39 @@
+<script setup lang="ts">
+import { products } from '~/data/products'
+import { PAGINATION } from '~/constants'
+
+const { user, isAuthenticated, hydrated, logout } = useAuth()
+
+const activeTab = ref('library')
+const librarySearch = ref('')
+const libraryPage = ref(1)
+
+const purchasedList = computed(() =>
+  products.filter(p => user.value?.purchasedProducts.includes(p.id))
+)
+
+const filteredLibrary = computed(() => {
+  let result = purchasedList.value
+  if (librarySearch.value) {
+    const q = librarySearch.value.toLowerCase()
+    result = result.filter(p => p.title.toLowerCase().includes(q))
+  }
+  const start = (libraryPage.value - 1) * PAGINATION.LIBRARY_PER_PAGE
+  return result.slice(start, start + PAGINATION.LIBRARY_PER_PAGE)
+})
+
+const libraryTotalPages = computed(() =>
+  Math.ceil(purchasedList.value.length / PAGINATION.LIBRARY_PER_PAGE)
+)
+</script>
+
 <template>
   <v-container class="py-8">
     <!-- Not logged in -->
-    <template v-if="!isAuthenticated">
+    <template v-if="!hydrated">
+      <!-- Waiting for session hydration -->
+    </template>
+    <template v-else-if="!isAuthenticated">
       <v-card class="mx-auto pa-8" max-width="400" flat variant="outlined" rounded="lg">
         <h1 class="text-h5 font-weight-bold text-center mb-4">Sign In Required</h1>
         <p class="text-body-2 text-grey text-center mb-6">Please sign in to access your account.</p>
@@ -37,8 +69,8 @@
         style="max-width: 300px"
       />
 
-      <!-- Library Grid -->
       <v-window v-model="activeTab">
+        <!-- Library -->
         <v-window-item value="library">
           <template v-if="purchasedList.length">
             <v-row>
@@ -58,24 +90,14 @@
                     </p>
                   </v-card-text>
                   <v-card-actions class="px-4 pb-4 pt-0">
-                    <v-btn
-                      block
-                      color="primary"
-                      variant="flat"
-                      size="small"
-                      prepend-icon="mdi-download"
-                    >
+                    <v-btn block color="primary" variant="flat" size="small" prepend-icon="mdi-download">
                       Download
-                    </v-btn>
-                    <v-btn icon variant="text" size="x-small" class="ml-2">
-                      <v-icon>mdi-bookmark-outline</v-icon>
                     </v-btn>
                   </v-card-actions>
                 </v-card>
               </v-col>
             </v-row>
 
-            <!-- Pagination -->
             <div v-if="libraryTotalPages > 1" class="d-flex justify-center mt-8">
               <v-pagination
                 v-model="libraryPage"
@@ -95,6 +117,7 @@
           </v-card>
         </v-window-item>
 
+        <!-- Collections -->
         <v-window-item value="collections">
           <v-card flat class="text-center py-12">
             <v-icon size="48" color="grey-lighten-1">mdi-bookmark-outline</v-icon>
@@ -106,33 +129,6 @@
     </template>
   </v-container>
 </template>
-
-<script setup lang="ts">
-import { products } from '~/data/products'
-
-const { user, isAuthenticated, logout } = useAuth()
-
-const activeTab = ref('library')
-const librarySearch = ref('')
-const libraryPage = ref(1)
-const perPage = 16
-
-const purchasedList = computed(() =>
-  products.filter(p => user.value?.purchasedProducts.includes(p.id))
-)
-
-const filteredLibrary = computed(() => {
-  let result = purchasedList.value
-  if (librarySearch.value) {
-    const q = librarySearch.value.toLowerCase()
-    result = result.filter(p => p.title.toLowerCase().includes(q))
-  }
-  const start = (libraryPage.value - 1) * perPage
-  return result.slice(start, start + perPage)
-})
-
-const libraryTotalPages = computed(() => Math.ceil(purchasedList.value.length / perPage))
-</script>
 
 <style scoped>
 .library-title {

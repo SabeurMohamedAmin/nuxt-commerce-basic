@@ -5,6 +5,15 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
 
+  runtimeConfig: {
+    stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
+    stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
+    public: {
+      stripePublicKey: process.env.STRIPE_PUBLIC_KEY || '',
+      baseUrl: process.env.BASE_URL || 'http://localhost:3000',
+    },
+  },
+
   modules: [
     '@pinia/nuxt',
     '@vueuse/nuxt',
@@ -36,6 +45,14 @@ export default defineNuxtConfig({
 
   build: {
     transpile: ['vuetify'],
+  },
+
+  app: {
+    head: {
+      link: [
+        { rel: 'icon', type: 'image/png', href: '/images/logo/image.png' },
+      ],
+    },
   },
 
   i18n: {

@@ -1,8 +1,35 @@
+<script setup lang="ts">
+import { products } from '~/data/products'
+import { CATEGORIES, SORT_OPTIONS } from '~/constants'
+
+const route = useRoute()
+
+const categoryOptions = [{ name: 'All Categories', slug: '' }, ...CATEGORIES]
+
+const {
+  search,
+  selectedCategory,
+  sortBy,
+  currentPage,
+  filteredProducts,
+  paginatedProducts,
+  totalPages,
+} = useProductFilter({ products })
+
+// Initialize from query params
+onMounted(() => {
+  if (route.query.search) search.value = route.query.search as string
+  if (route.query.category) selectedCategory.value = route.query.category as string
+})
+</script>
+
 <template>
   <v-container class="py-8">
     <!-- Page Header -->
     <h1 class="text-h4 font-weight-bold mb-1">Digital Products</h1>
-    <p class="text-body-2 text-grey mb-6">Browse our collection of {{ filteredProducts.length }} products</p>
+    <p class="text-body-2 text-grey mb-6">
+      Browse our collection of {{ filteredProducts.length }} products
+    </p>
 
     <!-- Filters -->
     <v-card flat variant="outlined" rounded="lg" class="mb-6">
@@ -35,7 +62,7 @@
           <v-col cols="12" md="3">
             <v-select
               v-model="sortBy"
-              :items="sortOptions"
+              :items="SORT_OPTIONS"
               item-title="label"
               item-value="value"
               variant="outlined"
@@ -81,55 +108,4 @@
   </v-container>
 </template>
 
-<script setup lang="ts">
-import { products, categories } from '~/data/products'
-
-const route = useRoute()
-
-const search = ref((route.query.search as string) || '')
-const selectedCategory = ref((route.query.category as string) || '')
-const sortBy = ref('default')
-const currentPage = ref(1)
-const perPage = 16
-
-const categoryOptions = [{ name: 'All Categories', slug: '' }, ...categories]
-const sortOptions = [
-  { label: 'Default', value: 'default' },
-  { label: 'Name A-Z', value: 'name-asc' },
-  { label: 'Name Z-A', value: 'name-desc' },
-  { label: 'Price Low-High', value: 'price-asc' },
-  { label: 'Price High-Low', value: 'price-desc' },
-]
-
-const filteredProducts = computed(() => {
-  let result = [...products]
-
-  if (search.value) {
-    const q = search.value.toLowerCase()
-    result = result.filter(p => p.title.toLowerCase().includes(q))
-  }
-
-  if (selectedCategory.value) {
-    result = result.filter(p => p.categorySlug === selectedCategory.value)
-  }
-
-  if (sortBy.value === 'name-asc') result.sort((a, b) => a.title.localeCompare(b.title))
-  else if (sortBy.value === 'name-desc') result.sort((a, b) => b.title.localeCompare(a.title))
-  else if (sortBy.value === 'price-asc') result.sort((a, b) => a.price - b.price)
-  else if (sortBy.value === 'price-desc') result.sort((a, b) => b.price - a.price)
-
-  return result
-})
-
-const totalPages = computed(() => Math.ceil(filteredProducts.value.length / perPage))
-
-const paginatedProducts = computed(() => {
-  const start = (currentPage.value - 1) * perPage
-  return filteredProducts.value.slice(start, start + perPage)
-})
-
-// Reset page when filters change
-watch([search, selectedCategory, sortBy], () => {
-  currentPage.value = 1
-})
-</script>
+<style scoped></style>
