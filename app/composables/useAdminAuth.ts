@@ -26,7 +26,8 @@ export function useAdminAuth() {
   hydrateSession()
 
   function adminLogin(email: string, password: string): true | string {
-    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+    const cleanEmail = email.trim().toLowerCase()
+    if (cleanEmail === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
       admin.value = {
         id: 1,
         name: 'Admin',

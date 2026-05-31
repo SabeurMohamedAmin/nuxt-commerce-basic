@@ -25,12 +25,13 @@ export function useAuth() {
   }
 
   function login(email: string, password: string): true | string {
-    if (!email || !password) return 'Email and password are required'
+    const cleanEmail = email.trim().toLowerCase()
+    if (!cleanEmail || !password) return 'Email and password are required'
 
     user.value = {
       id: 2,
-      name: email.split('@')[0],
-      email,
+      name: cleanEmail.split('@')[0],
+      email: cleanEmail,
       purchasedProducts: [],
     }
     persistSession()
@@ -44,12 +45,14 @@ export function useAuth() {
   }
 
   function register(name: string, email: string, password: string): true | string {
-    if (!name || !email || !password) return 'All fields are required'
+    const cleanEmail = email.trim().toLowerCase()
+    const cleanName = name.trim()
+    if (!cleanName || !cleanEmail || !password) return 'All fields are required'
 
     user.value = {
       id: 2,
-      name,
-      email,
+      name: cleanName,
+      email: cleanEmail,
       purchasedProducts: [],
     }
     persistSession()
