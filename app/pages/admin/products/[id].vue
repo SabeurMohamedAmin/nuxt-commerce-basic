@@ -13,6 +13,7 @@ const form = reactive({
   title: '',
   slug: '',
   description: '',
+  previewUrl: '',
   category: '',
   price: 2.49,
   status: 'published',
@@ -23,10 +24,11 @@ const form = reactive({
 // Fetch product data
 onMounted(async () => {
   try {
-    const product = await $fetch(`/api/admin/products/${route.params.id}`)
+    const product = await $fetch<any>(`/api/admin/products/${route.params.id}`)
     form.title = product.title
     form.slug = product.slug
     form.description = product.description
+    form.previewUrl = product.previewUrl || ''
     form.category = product.categorySlug
     form.price = product.price
     form.status = product.status
@@ -55,6 +57,7 @@ async function updateProduct() {
         title: form.title,
         slug: form.slug,
         description: form.description,
+        previewUrl: form.previewUrl || null,
         price: form.price,
         image: form.imagePreview,
         category: categoryName,
@@ -93,8 +96,6 @@ async function handleDelete() {
     </div>
 
     <template v-else-if="!error">
-      <v-alert v-if="error" type="error" variant="tonal" class="mb-6">{{ error }}</v-alert>
-
       <v-row>
         <v-col cols="12" md="8">
           <v-card variant="outlined" rounded="lg" class="pa-6 mb-6">
@@ -102,6 +103,7 @@ async function handleDelete() {
             <v-text-field v-model="form.title" label="Product Title" variant="outlined" density="comfortable" class="mb-4" />
             <v-text-field v-model="form.slug" label="Slug" variant="outlined" density="comfortable" class="mb-4" />
             <v-textarea v-model="form.description" label="Description" variant="outlined" rows="6" class="mb-4" />
+            <v-text-field v-model="form.previewUrl" label="Preview / Demo URL" variant="outlined" density="comfortable" class="mb-4" placeholder="https://demo.example.com/theme-preview" hint="External link where buyers can preview the product live" persistent-hint />
             <v-row>
               <v-col cols="12" sm="6">
                 <v-select v-model="form.category" :items="CATEGORIES" item-title="name" item-value="slug" label="Category" variant="outlined" density="comfortable" />
@@ -130,6 +132,14 @@ async function handleDelete() {
             <v-btn block color="primary" size="large" :loading="saving" @click="updateProduct">
               <v-icon start>mdi-content-save</v-icon>
               Update Product
+            </v-btn>
+          </v-card>
+
+          <!-- Preview Link -->
+          <v-card v-if="form.previewUrl" variant="outlined" rounded="lg" class="pa-6 mb-6">
+            <h3 class="text-body-1 font-weight-bold mb-3">Live Preview</h3>
+            <v-btn block variant="outlined" color="primary" :href="form.previewUrl" target="_blank" prepend-icon="mdi-open-in-new">
+              Open Preview
             </v-btn>
           </v-card>
 

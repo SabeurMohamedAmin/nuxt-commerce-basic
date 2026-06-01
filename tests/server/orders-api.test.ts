@@ -13,8 +13,11 @@ describe('orders API logic', () => {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
       email TEXT NOT NULL UNIQUE,
-      password TEXT NOT NULL,
+      password TEXT NOT NULL DEFAULT '',
       role TEXT NOT NULL DEFAULT 'customer',
+      oauth_provider TEXT,
+      oauth_id TEXT,
+      avatar TEXT,
       created_at TEXT NOT NULL DEFAULT ''
     )`)
     await client.execute(`CREATE TABLE products (
@@ -24,6 +27,7 @@ describe('orders API logic', () => {
       description TEXT NOT NULL DEFAULT '',
       price REAL NOT NULL DEFAULT 2.49,
       image TEXT NOT NULL DEFAULT '',
+      preview_url TEXT,
       category TEXT NOT NULL,
       category_slug TEXT NOT NULL,
       file_name TEXT,

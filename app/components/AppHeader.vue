@@ -77,7 +77,8 @@ const userInitial = computed(() =>
           <template v-if="isAuthenticated">
             <v-btn icon variant="text" size="small" to="/account">
               <v-avatar color="orange" size="32">
-                <span class="text-white text-body-2">{{ userInitial }}</span>
+                <v-img v-if="user?.avatar" :src="user.avatar" />
+                <span v-else class="text-white text-body-2">{{ userInitial }}</span>
               </v-avatar>
             </v-btn>
             <v-btn icon variant="text" size="small" class="d-none d-sm-flex" @click="logout">

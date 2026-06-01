@@ -1,5 +1,6 @@
 import { createClient } from '@libsql/client'
 import { drizzle } from 'drizzle-orm/libsql'
+import bcrypt from 'bcrypt'
 import * as schema from './schema'
 
 const client = createClient({ url: 'file:./data/store.db' })
@@ -64,18 +65,20 @@ async function seed() {
   console.log('🌱 Seeding database...')
 
   // Create admin user
+  const adminPassword = await bcrypt.hash('123456', 12)
   await db.insert(schema.users).values({
     name: 'Admin',
     email: 'aminsab@outlook.fr',
-    password: '123456',
+    password: adminPassword,
     role: 'admin',
   }).onConflictDoNothing()
 
   // Create sample customer
+  const customerPassword = await bcrypt.hash('password123', 12)
   await db.insert(schema.users).values({
     name: 'John Doe',
     email: 'john@example.com',
-    password: 'password123',
+    password: customerPassword,
     role: 'customer',
   }).onConflictDoNothing()
 

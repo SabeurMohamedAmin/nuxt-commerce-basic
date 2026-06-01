@@ -8,6 +8,22 @@ export default defineNuxtConfig({
   runtimeConfig: {
     stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
     stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
+    oauth: {
+      google: {
+        clientId: process.env.OAUTH_GOOGLE_CLIENT_ID || '',
+        clientSecret: process.env.OAUTH_GOOGLE_CLIENT_SECRET || '',
+      },
+      facebook: {
+        clientId: process.env.OAUTH_FACEBOOK_CLIENT_ID || '',
+        clientSecret: process.env.OAUTH_FACEBOOK_CLIENT_SECRET || '',
+        scope: ['email', 'public_profile'],
+      },
+      microsoft: {
+        clientId: process.env.OAUTH_MICROSOFT_CLIENT_ID || '',
+        clientSecret: process.env.OAUTH_MICROSOFT_CLIENT_SECRET || '',
+        tenant: process.env.OAUTH_MICROSOFT_TENANT || 'common',
+      },
+    },
     public: {
       stripePublicKey: process.env.STRIPE_PUBLIC_KEY || '',
       baseUrl: process.env.BASE_URL || 'http://localhost:3000',

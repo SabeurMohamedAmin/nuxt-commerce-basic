@@ -1,25 +1,30 @@
 <script setup lang="ts">
-import { products } from '~/data/products'
+import type { Product } from '~/types'
 import { formatPrice } from '~/utils/format'
 
 const route = useRoute()
 const { addToCart } = useCart()
 const { hasPurchased } = useAuth()
 
-const product = computed(() =>
-  products.find(p => p.slug === route.params.slug)
-)
+const loading = ref(true)
+const product = ref<Product | null>(null)
+const relatedProducts = ref<Product[]>([])
+
+onMounted(async () => {
+  try {
+    product.value = await $fetch(`/api/products/${route.params.slug}`)
+    // Fetch related
+    const related = await $fetch(`/api/products/related/${route.params.slug}`)
+    relatedProducts.value = related as Product[]
+  } catch {
+    product.value = null
+  }
+  loading.value = false
+})
 
 const isPurchased = computed(() =>
   product.value ? hasPurchased(product.value.id) : false
 )
-
-const relatedProducts = computed(() => {
-  if (!product.value) return []
-  return products
-    .filter(p => p.categorySlug === product.value!.categorySlug && p.id !== product.value!.id)
-    .slice(0, 5)
-})
 
 function handleAddToCart() {
   if (!product.value) return
@@ -36,22 +41,28 @@ function handleBuyNow() {
   navigateTo('/checkout')
 }
 
-useHead({ title: product.value?.title || 'Product Not Found' })
+watchEffect(() => {
+  if (product.value) {
+    useHead({ title: product.value.title })
+  }
+})
 </script>
 
 <template>
   <v-container class="py-6">
-    <!-- Back link -->
     <NuxtLink to="/products" class="text-body-2 text-grey-darken-1 text-decoration-none d-inline-flex align-center mb-4">
       <v-icon size="16" class="mr-1">mdi-arrow-left</v-icon>
       Back to Products
     </NuxtLink>
 
-    <template v-if="product">
+    <div v-if="loading" class="text-center py-12">
+      <v-progress-circular indeterminate color="primary" />
+    </div>
+
+    <template v-else-if="product">
       <h1 class="text-h5 font-weight-bold mb-6">{{ product.title }}</h1>
 
       <v-row>
-        <!-- Left Column -->
         <v-col cols="12" md="5">
           <v-card flat variant="outlined" rounded="lg" class="mb-4">
             <v-img :src="product.image" :alt="product.title" height="240" cover />
@@ -59,10 +70,7 @@ useHead({ title: product.value?.title || 'Product Not Found' })
 
           <div class="d-flex align-center ga-2 mb-3">
             <span class="text-body-2 text-grey">Category:</span>
-            <NuxtLink
-              :to="`/products?category=${product.categorySlug}`"
-              class="text-body-2 text-primary text-decoration-none font-weight-medium"
-            >
+            <NuxtLink :to="`/products?category=${product.categorySlug}`" class="text-body-2 text-primary text-decoration-none font-weight-medium">
               {{ product.category }}
             </NuxtLink>
           </div>
@@ -75,7 +83,6 @@ useHead({ title: product.value?.title || 'Product Not Found' })
           </v-alert>
         </v-col>
 
-        <!-- Right Column -->
         <v-col cols="12" md="7">
           <v-card flat variant="outlined" rounded="lg" class="pa-6 mb-4">
             <p class="text-body-2 text-grey mb-1">
@@ -93,6 +100,10 @@ useHead({ title: product.value?.title || 'Product Not Found' })
             <v-btn color="primary" block size="large" class="mb-2" @click="handleBuyNow">
               <v-icon start>mdi-flash</v-icon>
               Buy Now
+            </v-btn>
+            <v-btn v-if="product.previewUrl" variant="tonal" color="info" block class="mb-2" :href="product.previewUrl" target="_blank">
+              <v-icon start>mdi-open-in-new</v-icon>
+              Live Preview
             </v-btn>
             <v-btn v-if="isPurchased" variant="text" block class="mb-2" to="/account">
               <v-icon start>mdi-download</v-icon>
@@ -113,24 +124,13 @@ useHead({ title: product.value?.title || 'Product Not Found' })
         </v-col>
       </v-row>
 
-      <!-- Description -->
       <ProductDescription class="mt-8" />
-
-      <!-- FAQ -->
       <ProductFaq class="mt-6" />
 
-      <!-- Related Products -->
       <section v-if="relatedProducts.length" class="mt-8">
         <h2 class="text-h6 font-weight-bold mb-4">You might also like</h2>
         <v-row>
-          <v-col
-            v-for="related in relatedProducts"
-            :key="related.id"
-            cols="6"
-            sm="4"
-            md="3"
-            lg="2"
-          >
+          <v-col v-for="related in relatedProducts" :key="related.id" cols="6" sm="4" md="3" lg="2">
             <v-card variant="outlined" rounded="lg" hover :to="`/products/${related.slug}`">
               <v-img :src="related.image" :alt="related.title" height="100" cover />
               <v-card-text class="pa-2">
@@ -146,7 +146,6 @@ useHead({ title: product.value?.title || 'Product Not Found' })
       </section>
     </template>
 
-    <!-- Not Found -->
     <v-card v-else flat class="text-center py-12">
       <v-icon size="64" color="grey-lighten-1">mdi-alert-circle-outline</v-icon>
       <p class="text-h6 text-grey mt-4">Product not found</p>

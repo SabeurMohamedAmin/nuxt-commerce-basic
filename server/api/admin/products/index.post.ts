@@ -3,7 +3,7 @@ import { products } from '~~/server/database/schema'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const { title, slug, description, price, image, category, categorySlug, fileName, filePath, status } = body
+  const { title, slug, description, price, image, category, categorySlug, previewUrl, fileName, filePath, status } = body
 
   if (!title || !slug || !categorySlug) {
     throw createError({ statusCode: 400, message: 'title, slug, and categorySlug are required' })
@@ -15,6 +15,7 @@ export default defineEventHandler(async (event) => {
     description: description || '',
     price: price || 2.49,
     image: image || '',
+    previewUrl: previewUrl || null,
     category: category || '',
     categorySlug,
     fileName: fileName || null,

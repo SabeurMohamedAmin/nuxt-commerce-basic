@@ -1,16 +1,32 @@
 <script setup lang="ts">
-import { products } from '~/data/products'
+import type { Product } from '~/types'
 import { PAGINATION } from '~/constants'
 
-const { user, isAuthenticated, hydrated, logout } = useAuth()
+definePageMeta({ middleware: 'auth' })
+
+const { user, isAuthenticated, logout } = useAuth()
 
 const activeTab = ref('library')
 const librarySearch = ref('')
 const libraryPage = ref(1)
+const loading = ref(false)
+const purchasedList = ref<Product[]>([])
 
-const purchasedList = computed(() =>
-  products.filter(p => user.value?.purchasedProducts.includes(p.id))
-)
+// Fetch purchases from API when user is available
+watch(() => user.value?.id, async (userId) => {
+  if (!userId) {
+    purchasedList.value = []
+    return
+  }
+  loading.value = true
+  try {
+    const data = await $fetch(`/api/purchases/${userId}`)
+    purchasedList.value = (data as Product[]).filter(p => p.id)
+  } catch {
+    purchasedList.value = []
+  }
+  loading.value = false
+}, { immediate: true })
 
 const filteredLibrary = computed(() => {
   let result = purchasedList.value
@@ -29,7 +45,6 @@ const libraryTotalPages = computed(() =>
 
 <template>
   <v-container class="py-8">
-    <!-- Not logged in -->
     <template v-if="!hydrated">
       <!-- Waiting for session hydration -->
     </template>
@@ -41,7 +56,6 @@ const libraryTotalPages = computed(() =>
       </v-card>
     </template>
 
-    <!-- Logged in -->
     <template v-else>
       <div class="d-flex justify-space-between align-center mb-6">
         <div>
@@ -51,13 +65,11 @@ const libraryTotalPages = computed(() =>
         <v-btn variant="text" color="error" @click="logout">Sign Out</v-btn>
       </div>
 
-      <!-- Tabs -->
       <v-tabs v-model="activeTab" color="primary" class="mb-6">
         <v-tab value="library">My Library ({{ purchasedList.length }})</v-tab>
         <v-tab value="collections">My Collections</v-tab>
       </v-tabs>
 
-      <!-- Search -->
       <v-text-field
         v-model="librarySearch"
         placeholder="Search your library..."
@@ -70,42 +82,28 @@ const libraryTotalPages = computed(() =>
       />
 
       <v-window v-model="activeTab">
-        <!-- Library -->
         <v-window-item value="library">
-          <template v-if="purchasedList.length">
+          <div v-if="loading" class="text-center py-12">
+            <v-progress-circular indeterminate color="primary" />
+          </div>
+
+          <template v-else-if="purchasedList.length">
             <v-row>
-              <v-col
-                v-for="product in filteredLibrary"
-                :key="product.id"
-                cols="12"
-                sm="6"
-                md="4"
-                lg="3"
-              >
+              <v-col v-for="product in filteredLibrary" :key="product.id" cols="12" sm="6" md="4" lg="3">
                 <v-card variant="outlined" rounded="lg" class="h-100">
                   <v-img :src="product.image" :alt="product.title" height="160" cover />
                   <v-card-text class="pb-2">
-                    <p class="text-body-2 font-weight-medium library-title">
-                      {{ product.title.toUpperCase() }}
-                    </p>
+                    <p class="text-body-2 font-weight-medium library-title">{{ product.title.toUpperCase() }}</p>
                   </v-card-text>
                   <v-card-actions class="px-4 pb-4 pt-0">
-                    <v-btn block color="primary" variant="flat" size="small" prepend-icon="mdi-download">
-                      Download
-                    </v-btn>
+                    <v-btn block color="primary" variant="flat" size="small" prepend-icon="mdi-download">Download</v-btn>
                   </v-card-actions>
                 </v-card>
               </v-col>
             </v-row>
 
             <div v-if="libraryTotalPages > 1" class="d-flex justify-center mt-8">
-              <v-pagination
-                v-model="libraryPage"
-                :length="libraryTotalPages"
-                :total-visible="5"
-                rounded="circle"
-                color="primary"
-              />
+              <v-pagination v-model="libraryPage" :length="libraryTotalPages" :total-visible="5" rounded="circle" color="primary" />
             </div>
           </template>
 
@@ -117,7 +115,6 @@ const libraryTotalPages = computed(() =>
           </v-card>
         </v-window-item>
 
-        <!-- Collections -->
         <v-window-item value="collections">
           <v-card flat class="text-center py-12">
             <v-icon size="48" color="grey-lighten-1">mdi-bookmark-outline</v-icon>

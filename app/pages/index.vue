@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import { products } from '~/data/products'
 import { CATEGORIES } from '~/constants'
 
-const featuredProducts = computed(() => products.slice(0, 6))
+const { data: productsData } = await useFetch('/api/products', {
+  params: { limit: 6 },
+})
+
+const featuredProducts = computed(() => productsData.value?.products || [])
 
 function goToSearch(query: string) {
   navigateTo(`/products?search=${encodeURIComponent(query)}`)
@@ -11,10 +14,8 @@ function goToSearch(query: string) {
 
 <template>
   <div>
-    <!-- Hero Section -->
     <HeroSection @search="goToSearch" />
 
-    <!-- Categories -->
     <v-container class="py-12">
       <div class="d-flex flex-wrap justify-center ga-6">
         <NuxtLink
@@ -31,31 +32,28 @@ function goToSearch(query: string) {
       </div>
     </v-container>
 
-    <!-- Featured Products -->
     <v-container class="py-8">
       <h2 class="text-h4 font-weight-bold text-center mb-2">Featured Products</h2>
       <p class="text-body-2 text-grey text-center mb-8">Check out our most popular digital products</p>
 
-      <v-row>
+      <v-row v-if="featuredProducts.length">
         <v-col v-for="product in featuredProducts" :key="product.id" cols="12" sm="6" md="4">
           <ProductCard :product="product" />
         </v-col>
       </v-row>
+      <v-card v-else flat class="text-center py-12">
+        <v-icon size="48" color="grey-lighten-1">mdi-package-variant</v-icon>
+        <p class="text-body-1 text-grey mt-4">No products available yet</p>
+      </v-card>
 
-      <div class="text-center mt-8">
-        <v-btn variant="outlined" color="primary" rounded="pill" to="/products">
-          View All Products
-        </v-btn>
+      <div v-if="featuredProducts.length" class="text-center mt-8">
+        <v-btn variant="outlined" color="primary" rounded="pill" to="/products">View All Products</v-btn>
       </div>
     </v-container>
 
-    <!-- How It Works -->
     <HowItWorks />
-
-    <!-- Why Choose Us -->
     <WhyChooseUs />
 
-    <!-- CTA -->
     <section class="bg-primary py-12">
       <v-container class="text-center text-white">
         <h2 class="text-h4 font-weight-bold mb-4">Ready to Get Started?</h2>

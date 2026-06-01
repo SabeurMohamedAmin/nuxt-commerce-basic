@@ -36,8 +36,8 @@ function handleAddToCart() {
       <span class="text-primary font-weight-bold text-body-2">{{ formatPrice(product.price) }}</span>
       <v-spacer />
       <v-btn variant="text" size="small" :to="productUrl" class="text-body-2">View</v-btn>
-      <v-btn icon variant="text" size="x-small">
-        <v-icon size="18">mdi-bookmark-outline</v-icon>
+      <v-btn v-if="product.previewUrl" icon variant="text" size="x-small" :href="product.previewUrl" target="_blank" @click.stop>
+        <v-icon size="18">mdi-open-in-new</v-icon>
       </v-btn>
       <v-btn icon variant="flat" size="x-small" color="primary" @click.prevent="handleAddToCart">
         <v-icon size="18">mdi-cart-plus</v-icon>

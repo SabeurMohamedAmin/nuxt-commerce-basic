@@ -1,52 +1,41 @@
-import type { AdminUser } from '~/types'
-import { STORAGE_KEYS } from '~/constants'
-import { getStoredItem, setStoredItem, removeStoredItem } from '~/utils/storage'
-
-const ADMIN_EMAIL = 'aminsab@outlook.fr'
-const ADMIN_PASSWORD = '123456'
-
-const admin = ref<AdminUser | null>(null)
-const isAdminAuthenticated = computed(() => !!admin.value)
-
-function hydrateSession() {
-  if (import.meta.client && !admin.value) {
-    admin.value = getStoredItem<AdminUser>(STORAGE_KEYS.ADMIN_SESSION)
-  }
-}
-
-function persistSession() {
-  if (admin.value) {
-    setStoredItem(STORAGE_KEYS.ADMIN_SESSION, admin.value)
-  } else {
-    removeStoredItem(STORAGE_KEYS.ADMIN_SESSION)
-  }
-}
-
+/**
+ * Admin auth composable.
+ * Uses nuxt-auth-utils useUserSession() for server-backed sessions.
+ */
 export function useAdminAuth() {
-  hydrateSession()
+  const { loggedIn, user, clear, fetch: fetchSession } = useUserSession()
 
-  function adminLogin(email: string, password: string): true | string {
+  const isAdminAuthenticated = computed(() =>
+    loggedIn.value && user.value?.role === 'admin'
+  )
+
+  const admin = computed(() =>
+    isAdminAuthenticated.value ? user.value : null
+  )
+
+  async function adminLogin(email: string, password: string): Promise<true | string> {
     const cleanEmail = email.trim().toLowerCase()
-    if (cleanEmail === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-      admin.value = {
-        id: 1,
-        name: 'Admin',
-        email: ADMIN_EMAIL,
-      }
-      persistSession()
+    if (!cleanEmail || !password) return 'Email and password are required'
+
+    try {
+      await $fetch('/auth/admin-login', {
+        method: 'POST',
+        body: { email: cleanEmail, password },
+      })
+      await fetchSession()
       return true
+    } catch (err: any) {
+      return err?.data?.message || 'Invalid admin credentials'
     }
-    return 'Invalid admin credentials'
   }
 
-  function adminLogout() {
-    admin.value = null
-    persistSession()
+  async function adminLogout() {
+    await clear()
     navigateTo('/admin/login')
   }
 
   return {
-    admin: readonly(admin),
+    admin,
     isAdminAuthenticated,
     adminLogin,
     adminLogout,

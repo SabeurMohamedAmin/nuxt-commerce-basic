@@ -18,6 +18,7 @@ describe('admin products API logic', () => {
       description TEXT NOT NULL DEFAULT '',
       price REAL NOT NULL DEFAULT 2.49,
       image TEXT NOT NULL DEFAULT '',
+      preview_url TEXT,
       category TEXT NOT NULL,
       category_slug TEXT NOT NULL,
       file_name TEXT,

@@ -5,8 +5,11 @@ export const users = sqliteTable('users', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   name: text('name').notNull(),
   email: text('email').notNull().unique(),
-  password: text('password').notNull(),
+  password: text('password').notNull().default(''),
   role: text('role', { enum: ['customer', 'admin'] }).notNull().default('customer'),
+  oauthProvider: text('oauth_provider'),
+  oauthId: text('oauth_id'),
+  avatar: text('avatar'),
   createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
 })
 
@@ -18,6 +21,7 @@ export const products = sqliteTable('products', {
   description: text('description').notNull().default(''),
   price: real('price').notNull().default(2.49),
   image: text('image').notNull().default(''),
+  previewUrl: text('preview_url'),
   category: text('category').notNull(),
   categorySlug: text('category_slug').notNull(),
   fileName: text('file_name'),
@@ -34,6 +38,15 @@ export const orders = sqliteTable('orders', {
   amount: real('amount').notNull(),
   status: text('status', { enum: ['completed', 'pending', 'refunded'] }).notNull().default('completed'),
   createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
+})
+
+// ─── Login Attempts (brute-force protection) ────────────────────
+export const loginAttempts = sqliteTable('login_attempts', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  ip: text('ip').notNull(),
+  timestamp: integer('timestamp').notNull(),
+  success: integer('success', { mode: 'boolean' }).notNull(),
 })
 
 // ─── User Purchases (library) ───────────────────────────────────

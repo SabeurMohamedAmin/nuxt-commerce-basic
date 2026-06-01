@@ -5,6 +5,7 @@ export interface Product {
   slug: string
   price: number
   image: string
+  previewUrl?: string | null
   category: string
   categorySlug: string
 }
@@ -28,6 +29,7 @@ export interface User {
   id: number
   name: string
   email: string
+  avatar?: string | null
   purchasedProducts: number[]
 }
 

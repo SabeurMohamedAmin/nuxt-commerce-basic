@@ -1,126 +1,119 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
+
+// Mock useUserSession from nuxt-auth-utils
+const mockSession = {
+  loggedIn: ref(false),
+  user: ref(null as any),
+  clear: vi.fn(),
+  fetch: vi.fn(),
+}
+vi.stubGlobal('useUserSession', () => mockSession)
+vi.stubGlobal('$fetch', vi.fn())
+
 import { useAuth } from '~/composables/useAuth'
 
-describe('useAuth', () => {
+describe('useAuth (server session based)', () => {
   beforeEach(() => {
-    localStorage.clear()
-    // Reset auth state
-    const { logout } = useAuth()
+    mockSession.loggedIn.value = false
+    mockSession.user.value = null
+    vi.mocked($fetch).mockReset()
+    vi.mocked(mockSession.clear).mockReset()
+    vi.mocked(mockSession.fetch).mockReset()
     vi.mocked(navigateTo).mockClear()
-    logout()
   })
 
   it('starts unauthenticated', () => {
-    const { isAuthenticated, user } = useAuth()
+    const { isAuthenticated } = useAuth()
     expect(isAuthenticated.value).toBe(false)
-    expect(user.value).toBeNull()
   })
 
-  it('logs in with valid credentials', () => {
-    const { login, isAuthenticated, user } = useAuth()
+  it('is authenticated when session exists', () => {
+    mockSession.loggedIn.value = true
+    mockSession.user.value = { id: 1, name: 'Test', email: 'test@example.com', role: 'customer' }
 
-    const result = login('test@example.com', 'password123')
-
-    expect(result).toBe(true)
+    const { isAuthenticated, user } = useAuth()
     expect(isAuthenticated.value).toBe(true)
     expect(user.value?.email).toBe('test@example.com')
   })
 
-  it('returns error for empty email', () => {
+  it('login calls /auth/login and fetches session', async () => {
+    vi.mocked($fetch).mockResolvedValueOnce({ id: 1, name: 'test', email: 'test@example.com' })
+    vi.mocked(mockSession.fetch).mockImplementation(async () => {
+      mockSession.loggedIn.value = true
+      mockSession.user.value = { id: 1, name: 'test', email: 'test@example.com', role: 'customer' }
+    })
+
     const { login } = useAuth()
-
-    const result = login('', 'password')
-
-    expect(result).toBe('Email and password are required')
-  })
-
-  it('returns error for empty password', () => {
-    const { login } = useAuth()
-
-    const result = login('test@example.com', '')
-
-    expect(result).toBe('Email and password are required')
-  })
-
-  it('sets user name from email prefix', () => {
-    const { login, user } = useAuth()
-
-    login('john.doe@example.com', 'pass')
-
-    expect(user.value?.name).toBe('john.doe')
-  })
-
-  it('logs out and clears user', () => {
-    const { login, logout, isAuthenticated, user } = useAuth()
-
-    login('test@example.com', 'pass')
-    logout()
-
-    expect(isAuthenticated.value).toBe(false)
-    expect(user.value).toBeNull()
-  })
-
-  it('registers a new user', () => {
-    const { register, isAuthenticated, user } = useAuth()
-
-    const result = register('John', 'john@example.com', 'pass123')
+    const result = await login('test@example.com', 'password123')
 
     expect(result).toBe(true)
-    expect(isAuthenticated.value).toBe(true)
-    expect(user.value?.name).toBe('John')
-    expect(user.value?.email).toBe('john@example.com')
+    expect($fetch).toHaveBeenCalledWith('/auth/login', {
+      method: 'POST',
+      body: { email: 'test@example.com', password: 'password123' },
+    })
+    expect(mockSession.fetch).toHaveBeenCalled()
   })
 
-  it('register returns error for missing fields', () => {
-    const { register } = useAuth()
-
-    expect(register('', 'email@test.com', 'pass')).toBe('All fields are required')
-    expect(register('Name', '', 'pass')).toBe('All fields are required')
-    expect(register('Name', 'email@test.com', '')).toBe('All fields are required')
-  })
-
-  it('adds purchased products', () => {
-    const { login, addPurchasedProducts, hasPurchased } = useAuth()
-
-    login('test@example.com', 'pass')
-    addPurchasedProducts([1, 2, 3])
-
-    expect(hasPurchased(1)).toBe(true)
-    expect(hasPurchased(2)).toBe(true)
-    expect(hasPurchased(3)).toBe(true)
-    expect(hasPurchased(4)).toBe(false)
-  })
-
-  it('does not duplicate purchased products', () => {
-    const { login, addPurchasedProducts, user } = useAuth()
-
-    login('test@example.com', 'pass')
-    addPurchasedProducts([1, 2])
-    addPurchasedProducts([2, 3])
-
-    expect(user.value?.purchasedProducts).toEqual([1, 2, 3])
-  })
-
-  it('hasPurchased returns false when not logged in', () => {
-    const { hasPurchased } = useAuth()
-    expect(hasPurchased(1)).toBe(false)
-  })
-
-  it('persists session to localStorage', () => {
+  it('login returns error for empty email', async () => {
     const { login } = useAuth()
-
-    login('persist@example.com', 'pass')
-
-    const stored = JSON.parse(localStorage.getItem('user_session')!)
-    expect(stored.email).toBe('persist@example.com')
+    const result = await login('', 'password')
+    expect(result).toBe('Email and password are required')
   })
 
-  it('removes session from localStorage on logout', () => {
-    const { login, logout } = useAuth()
+  it('login returns error for empty password', async () => {
+    const { login } = useAuth()
+    const result = await login('test@example.com', '')
+    expect(result).toBe('Email and password are required')
+  })
 
-    login('test@example.com', 'pass')
-    logout()
+  it('login returns API error message on failure', async () => {
+    vi.mocked($fetch).mockRejectedValueOnce({ data: { message: 'Invalid email or password.' } })
 
-    expect(localStorage.getItem('user_session')).toBeNull()
+    const { login } = useAuth()
+    const result = await login('wrong@example.com', 'badpass')
+
+    expect(result).toBe('Invalid email or password.')
+  })
+
+  it('login trims and lowercases email', async () => {
+    vi.mocked($fetch).mockResolvedValueOnce({ id: 1, name: 'test', email: 'test@example.com' })
+    vi.mocked(mockSession.fetch).mockResolvedValueOnce(undefined)
+
+    const { login } = useAuth()
+    await login('  TEST@Example.COM  ', 'pass')
+
+    expect($fetch).toHaveBeenCalledWith('/auth/login', {
+      method: 'POST',
+      body: { email: 'test@example.com', password: 'pass' },
+    })
+  })
+
+  it('register calls /auth/register and fetches session', async () => {
+    vi.mocked($fetch).mockResolvedValueOnce({ id: 2, name: 'John', email: 'john@example.com' })
+    vi.mocked(mockSession.fetch).mockResolvedValueOnce(undefined)
+
+    const { register } = useAuth()
+    const result = await register('John', 'john@example.com', 'pass123')
+
+    expect(result).toBe(true)
+    expect($fetch).toHaveBeenCalledWith('/auth/register', {
+      method: 'POST',
+      body: { name: 'John', email: 'john@example.com', password: 'pass123' },
+    })
+  })
+
+  it('register returns error for missing fields', async () => {
+    const { register } = useAuth()
+    expect(await register('', 'email@test.com', 'pass')).toBe('All fields are required')
+    expect(await register('Name', '', 'pass')).toBe('All fields are required')
+    expect(await register('Name', 'email@test.com', '')).toBe('All fields are required')
+  })
+
+  it('logout clears session and navigates home', async () => {
+    const { logout } = useAuth()
+    await logout()
+
+    expect(mockSession.clear).toHaveBeenCalled()
+    expect(navigateTo).toHaveBeenCalledWith('/')
   })
 })

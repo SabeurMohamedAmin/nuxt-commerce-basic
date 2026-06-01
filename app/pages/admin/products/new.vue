@@ -11,6 +11,7 @@ const form = reactive({
   title: '',
   slug: '',
   description: '',
+  previewUrl: '',
   category: '',
   price: DEFAULT_PRODUCT_PRICE,
   status: 'draft',
@@ -25,6 +26,7 @@ const checklist = computed(() => [
   { label: 'Title', done: !!form.title },
   { label: 'Description', done: !!form.description },
   { label: 'Category', done: !!form.category },
+  { label: 'Preview URL', done: !!form.previewUrl },
   { label: 'Image', done: !!form.imagePreview },
   { label: 'ZIP File', done: !!form.file },
 ])
@@ -53,6 +55,7 @@ async function saveProduct() {
         title: form.title,
         slug: form.slug,
         description: form.description,
+        previewUrl: form.previewUrl || null,
         price: form.price,
         image: form.imagePreview || '',
         category: categoryName,
@@ -88,6 +91,7 @@ async function saveProduct() {
           <v-text-field v-model="form.title" label="Product Title" variant="outlined" density="comfortable" class="mb-4" />
           <v-text-field v-model="form.slug" label="Slug" variant="outlined" density="comfortable" class="mb-4" hint="Auto-generated from title" persistent-hint />
           <v-textarea v-model="form.description" label="Description" variant="outlined" rows="6" class="mb-4" />
+          <v-text-field v-model="form.previewUrl" label="Preview / Demo URL" variant="outlined" density="comfortable" class="mb-4" placeholder="https://demo.example.com/theme-preview" hint="External link where buyers can preview the product live" persistent-hint />
           <v-row>
             <v-col cols="12" sm="6">
               <v-select v-model="form.category" :items="CATEGORIES" item-title="name" item-value="slug" label="Category" variant="outlined" density="comfortable" />

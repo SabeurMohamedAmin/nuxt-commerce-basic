@@ -1,10 +1,14 @@
+/**
+ * Client middleware: redirects non-admin users to admin login.
+ */
 export default defineNuxtRouteMiddleware(() => {
-  // Skip on server — localStorage isn't available there
-  if (import.meta.server) return
+  const { loggedIn, user } = useUserSession()
 
-  const { isAdminAuthenticated } = useAdminAuth()
+  if (!loggedIn.value || !user.value) {
+    return navigateTo('/admin/login', { replace: true })
+  }
 
-  if (!isAdminAuthenticated.value) {
-    return navigateTo('/admin/login')
+  if (user.value.role !== 'admin') {
+    return navigateTo('/', { replace: true })
   }
 })
